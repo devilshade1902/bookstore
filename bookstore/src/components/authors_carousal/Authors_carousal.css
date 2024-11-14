@@ -1,0 +1,7 @@
+.author-image {
+    width: 100px;    /* Set the width of the circle */
+    height: 100px;   /* Set the height of the circle */
+    object-fit: cover; /* Ensures the image covers the container without stretching */
+    border-radius: 50%; /* Makes the image a circle */
+    margin: 0 auto;  /* Centers the image */
+  }

@@ -1,0 +1,39 @@
+.hero {
+    display: flex;
+    font-size: 14px;
+    align-items: center;
+    justify-content: space-around;
+    margin-top: 90px;
+    /* height: 500px; */
+    padding-bottom: 40px;
+    background: linear-gradient(135deg, #ff7043, #ffebee);
+}
+
+.hero-left img {
+    height: 500px;
+    width: auto;
+    margin-left: 20px;
+    margin-top: 60px;
+}
+
+.hero-right p {
+    text-align: end;
+    font-family: "Agdasima", sans-serif;
+    font-weight: 400;
+    font-size: 20px;
+    font-style: normal;
+
+}
+.hero-right h3{
+    text-align: end;
+    font-family: "MedievalSharp", cursive;
+}
+
+.buynow {
+    /* justify-content: center; */
+    /* justify-items: center; */
+    position: relative;
+    left: 270px;
+    top: 20px;
+}
+

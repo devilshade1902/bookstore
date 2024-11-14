@@ -1,0 +1,18 @@
+.trending{
+    margin-left: 90px;
+}
+
+.trending h3{
+    margin-top: 40px;
+}
+
+.book-items{
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 30px;
+    margin-top: 60px;
+}
+
+.book-items :hover{
+   /* background-color: gray; */
+}
