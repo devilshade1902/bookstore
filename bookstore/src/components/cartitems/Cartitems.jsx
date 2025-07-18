@@ -29,7 +29,7 @@ const Cartitems = ({ cartItems, removeFromCart }) => {
       <hr />
       <div className="cart-total">
         <h3>
-          Total Price: $
+          Total Price: ₹
           {cartItems.reduce((total, item) => total + item.price * item.quantity, 0)}
         </h3>
       </div>

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
 import Bookdisplay from '../bookdisplay/Bookdisplay';
 
-const Bookinfo = ({ addToCart }) => { // Accept addToCart as a prop
+const Bookinfo = ({ addToCart, cartItems, incrementQuantity, decrementQuantity }) => {
   const { book_id } = useParams();
   const [book, setBook] = useState(null);
 
@@ -21,7 +21,13 @@ const Bookinfo = ({ addToCart }) => { // Accept addToCart as a prop
 
   return (
     <div>
-      <Bookdisplay book={book} addToCart={addToCart} /> {/* Pass addToCart to Bookdisplay */}
+      <Bookdisplay
+        book={book}
+        addToCart={addToCart}
+        cartItems={cartItems}
+        incrementQuantity={incrementQuantity}
+        decrementQuantity={decrementQuantity}
+      />
     </div>
   );
 };

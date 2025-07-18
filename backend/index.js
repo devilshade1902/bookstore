@@ -3,7 +3,8 @@ const express = require("express");
 const app = express();
 app.use(express.json());
 const mysql = require("mysql2");
-const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 const multer = require("multer");
 const path = require("path");
 const cors = require("cors");
@@ -27,6 +28,20 @@ sql.connect((err)=>{
     console.log('connected to the database');
     
 })
+
+const JWT_SECRET = 'abcde'
+
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  if (!token) return res.status(401).json({ error: 'Access token required' });
+
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) return res.status(403).json({ error: 'Invalid token' });
+    req.user = user;
+    next();
+  });
+};
 
 app.get("/",(req,res)=>{
     res.send("Express app is running")
@@ -136,23 +151,91 @@ app.get('/trending',async (req,res)=>{
 })
 
 
+app.post('/signup', async (req, res) => {
+  const { name, email, password } = req.body;
 
+  if (!name || !email || !password) {
+    return res.status(400).json({ error: 'Name, email, and password are required' });
+  }
 
+  try {
+    // Check if email already exists
+    const checkQuery = 'SELECT * FROM users WHERE email = ?';
+    sql.query(checkQuery, [email], async (err, results) => {
+      if (err) {
+        console.error('Error checking email:', err);
+        return res.status(500).json({ error: 'Server error' });
+      }
+      if (results.length > 0) {
+        return res.status(400).json({ error: 'Email already exists' });
+      }
 
+      // Hash password
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const insertQuery = 'INSERT INTO users (name, email, password) VALUES (?, ?, ?)';
+      sql.query(insertQuery, [name, email, hashedPassword], (err, result) => {
+        if (err) {
+          console.error('Error creating user:', err);
+          return res.status(500).json({ error: 'Error creating user' });
+        }
 
+        // Generate JWT
+        const user = { id: result.insertId, name, email };
+        const token = jwt.sign(user, JWT_SECRET, { expiresIn: '1h' });
+        res.status(201).json({ token, user });
+      });
+    });
+  } catch (err) {
+    console.error('Error in signup:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
 
+app.post('/login', async (req, res) => {
+  const { email, password } = req.body;
 
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Email and password are required' });
+  }
 
+  const query = 'SELECT * FROM users WHERE email = ?';
+  sql.query(query, [email], async (err, results) => {
+    if (err) {
+      console.error('Error fetching user:', err);
+      return res.status(500).json({ error: 'Server error' });
+    }
+    if (results.length === 0) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
 
+    const user = results[0];
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
 
+    // Generate JWT
+    const token = jwt.sign({ id: user.id, name: user.name, email: user.email }, JWT_SECRET, {
+      expiresIn: '1h',
+    });
+    res.status(200).json({ token, user: { id: user.id, name: user.name, email: user.email } });
+  });
+});
 
-
-
-
-
-
-
-
+// User endpoint to fetch user data
+app.get('/user', authenticateToken, (req, res) => {
+  const query = 'SELECT id, name, email FROM users WHERE id = ?';
+  sql.query(query, [req.user.id], (err, results) => {
+    if (err) {
+      console.error('Error fetching user:', err);
+      return res.status(500).json({ error: 'Server error' });
+    }
+    if (results.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    res.status(200).json({ user: results[0] });
+  });
+});
 
 
 
